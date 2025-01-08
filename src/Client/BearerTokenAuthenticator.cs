@@ -18,6 +18,7 @@ namespace Talegen.Apple.Storekit.Client
     using System;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Cryptography;
+    using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using Talegen.Apple.Storekit.Models.Settings;
 
@@ -33,6 +34,15 @@ namespace Talegen.Apple.Storekit.Client
         private readonly string bundleId;
         private readonly string privateKey;
         private readonly DateTimeOffset? expiry;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BearerTokenAuthenticator"/> class.
+        /// </summary>
+        /// <param name="optionsAccessor">Contains an options accessor for <see cref="AppleApiSettings"/></param>
+        public BearerTokenAuthenticator(IOptions<AppleApiSettings> optionsAccessor)
+            : this(optionsAccessor.Value)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BearerTokenAuthenticator"/> class.
@@ -87,8 +97,8 @@ namespace Talegen.Apple.Storekit.Client
             var header = new JwtHeader(credentials);
             header[JwtHeaderParameterNames.Kid] = this.keyId;
 
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-            DateTimeOffset localExpiry = this.expiry ?? now.AddMinutes(5);
+            var now = DateTimeOffset.UtcNow;
+            var localExpiry = this.expiry ?? now.AddMinutes(5);
 
             var payload = new JwtPayload
             {

@@ -45,9 +45,8 @@ namespace Talegen.Apple.Storekit.Extensions
 
             services.AddOptions();
             services.Configure(config);
-            var settings = services.BuildServiceProvider().GetRequiredService<AppleApiSettings>();
-            services.AddScoped<IBearerTokenAuthenticator>((s) => new BearerTokenAuthenticator(settings));
-            services.AddScoped<AppStoreServerApiClient>();
+            services.AddScoped<IBearerTokenAuthenticator, BearerTokenAuthenticator>();
+            services.AddScoped<IAppStoreServerApiClient, AppStoreServerApiClient>();
             return services;
         }
     }

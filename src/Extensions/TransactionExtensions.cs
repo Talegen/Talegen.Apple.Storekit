@@ -46,7 +46,7 @@ namespace Talegen.Apple.Storekit.Extensions
         /// transaction.
         /// If the response is sorted in ASCENDING order, you receive the transaction again, with updated data.
         /// </remarks>
-        public static async Task<TransactionHistoryResponse> GetTransactionHistoryAsync(IAppStoreServerApiClient client, string transactionId, TransactionHistoryRequest? requestModel = null, CancellationToken cancellationToken = default)
+        public static async Task<TransactionHistoryResponse> GetTransactionHistoryAsync(this IAppStoreServerApiClient client, string transactionId, TransactionHistoryRequest? requestModel = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
@@ -79,7 +79,7 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="transactionId">Contains the transaction id to retrieve.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns the <see cref="JwsTransactionDecodedPayload"/> returned.</returns>
-        public static async Task<JwsTransactionDecodedPayload> GetTransactionAsync(IAppStoreServerApiClient client, string transactionId, CancellationToken cancellationToken = default)
+        public static async Task<JwsTransactionDecodedPayload> GetTransactionAsync(this IAppStoreServerApiClient client, string transactionId, CancellationToken cancellationToken = default)
         { 
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
