@@ -32,6 +32,6 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the key type.
         /// </summary>
         [JsonPropertyName("x5c")]
-        public List<string> X5c { get; set; }
+        public List<string> X5c { get; set; } = new List<string>();
     }
 }

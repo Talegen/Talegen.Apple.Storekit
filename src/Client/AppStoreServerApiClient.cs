@@ -131,7 +131,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
 
-        public async Task MakeRequest(string path, HttpMethod method, Dictionary<string, string> queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
+        public async Task MakeRequest(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(path));
             ArgumentNullException.ThrowIfNull(nameof(method));
@@ -196,7 +196,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
-        public async Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string> queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
+        public async Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(path));
             ArgumentNullException.ThrowIfNull(nameof(method));

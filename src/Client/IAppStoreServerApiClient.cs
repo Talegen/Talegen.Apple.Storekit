@@ -32,7 +32,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
-        Task MakeRequest(string path, HttpMethod method, Dictionary<string, string> queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default);
+        Task MakeRequest(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// This method is used to make a request to the Apple App Store API.
@@ -44,6 +44,6 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
-        Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string> queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default);
+        Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default);
     }
 }

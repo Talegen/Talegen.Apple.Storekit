@@ -19,11 +19,11 @@ namespace Talegen.Apple.Storekit.Extensions
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Web;
 
+
+    /// <summary>
+    /// This class contains extension methods for converting objects to query strings.
+    /// </summary>
     internal static class QueryExtensions
     {
         /// <summary>
@@ -45,22 +45,31 @@ namespace Talegen.Apple.Storekit.Extensions
                 .ToDictionary(x => x.Name, x => x.GetValue(request, null));
 
             // Get names for all IEnumerable properties (excl. string)
-            var propertyNames = properties
+            var enumerableProperties = properties
                 .Where(x => !(x.Value is string) && x.Value is IEnumerable)
                 .Select(x => x.Key)
                 .ToList();
 
             // Concat all IEnumerable properties into a comma separated string
-            foreach (var key in propertyNames)
+            foreach (var key in enumerableProperties)
             {
-                var valueType = properties[key].GetType();
+                var valueType = properties[key]?.GetType();
+
+                if (valueType == null)
+                {
+                    continue;
+                }
+
                 var valueElemType = valueType.IsGenericType
                                         ? valueType.GetGenericArguments()[0]
                                         : valueType.GetElementType();
-                if (valueElemType.IsPrimitive || valueElemType == typeof(string))
+                
+                if (valueElemType != null && valueElemType.IsPrimitive || valueElemType == typeof(string))
                 {
                     var enumerable = properties[key] as IEnumerable;
+#pragma warning disable CS8604 // Possible null reference argument.
                     properties[key] = string.Join(separator, enumerable.Cast<object>());
+#pragma warning restore CS8604 // Possible null reference argument.
                 }
             }
 
@@ -69,7 +78,7 @@ namespace Talegen.Apple.Storekit.Extensions
                 .Where(x => x.Value != null)
                 .Select(x => string.Concat(
                     Uri.EscapeDataString(x.Key), "=",
-                    Uri.EscapeDataString(x.Value.ToString()))));
+                    Uri.EscapeDataString(x.Value?.ToString() ?? string.Empty))));
         }
 
         /// <summary>
@@ -89,7 +98,7 @@ namespace Talegen.Apple.Storekit.Extensions
             return request.GetType().GetProperties()
                 .Where(x => x.CanRead)
                 .Where(x => x.GetValue(request, null) != null)
-                .ToDictionary(x => x.Name, x => x.GetValue(request, null).ToString());
+                .ToDictionary(x => x.Name, x => x.GetValue(request, null)?.ToString() ?? string.Empty);
         }
     }
 }
