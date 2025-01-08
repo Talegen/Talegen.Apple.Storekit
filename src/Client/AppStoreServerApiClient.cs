@@ -27,7 +27,6 @@ namespace Talegen.Apple.Storekit.Client
     using System.Threading;
     using System.Threading.Tasks;
     using Talegen.Apple.Storekit.Models;
-    using Talegen.Apple.Storekit.Models.Settings;
 
     /// <summary>
     /// This class contains the App Store Server API client implementation.
@@ -52,7 +51,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <summary>
         /// Contains the User-Agent string for the API client.
         /// </summary>
-        private const string USER_AGENT = "app-store-server-library/dotnet/{0}";
+        private const string USER_AGENT = "app-store-server-library-dotnet/{0}";
 
         /// <summary>
         /// Contains the JSON content type.
@@ -82,17 +81,6 @@ namespace Talegen.Apple.Storekit.Client
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AppStoreServerApiClient" /> class.
-        /// </summary>
-        /// <param name="httpClientFactory">Contains the HTTP client factory.</param>
-        /// <param name="appleApiSettings">Contains the Apple API settings.</param>
-        /// <param name="environment">Contains the environment type. Default is Production.</param>
-        public AppStoreServerApiClient(IHttpClientFactory httpClientFactory, AppleApiSettings appleApiSettings, EnvironmentType environment = EnvironmentType.Production)
-            : this(httpClientFactory, new BearerTokenAuthenticator(appleApiSettings.KeyId, appleApiSettings.IssuerId, appleApiSettings.BundleId, appleApiSettings.PrivateKey), environment)
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppStoreServerApiClient" /> class.
@@ -140,9 +128,10 @@ namespace Talegen.Apple.Storekit.Client
             Uri apiUri = new Uri(this.baseUri, path + queryString);
 
             HttpResponseMessage? responseMessage = null;
+            using var client = this.CreateApiHttpClient();
+
             try
             {
-                using var client = this.CreateApiHttpClient();
                 if (method == HttpMethod.Post)
                 {
                     HttpContent httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
@@ -206,11 +195,10 @@ namespace Talegen.Apple.Storekit.Client
 
             TReturn? result;
             HttpResponseMessage? responseMessage = null;
+            using var client = this.CreateApiHttpClient();
 
             try
             {
-                using var client = this.CreateApiHttpClient();
-                
                 if (method == HttpMethod.Get)
                 {
                     result = await client.GetFromJsonAsync<TReturn>(apiUri, this.jsonSerializerOptions, cancellationToken);
@@ -279,8 +267,8 @@ namespace Talegen.Apple.Storekit.Client
             }
 
             // add agent header
-            client.DefaultRequestHeaders.Add("User-Agent", string.Format(USER_AGENT, typeof(AppStoreServerApiClient).Assembly.GetName().Version));
-
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(string.Format(USER_AGENT, typeof(AppStoreServerApiClient).Assembly.GetName().Version));
+            
             // if no authorization header exists, then generate a new token
             if (client.DefaultRequestHeaders.Authorization == null)
             {

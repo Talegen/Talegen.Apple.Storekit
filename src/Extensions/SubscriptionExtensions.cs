@@ -32,7 +32,7 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="transactionId">Contains the transaction identifier.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns the subscription status.</returns>
-        public static async Task<SubscriptionStatusResponse> GetSubscriptionStatusAsync(IAppStoreServerApiClient client, string transactionId, AppleAutoRenewStatuses? status = null, CancellationToken cancellationToken = default)
+        public static async Task<SubscriptionStatusResponse> GetSubscriptionStatusAsync(this IAppStoreServerApiClient client, string transactionId, AppleAutoRenewStatuses? status = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));

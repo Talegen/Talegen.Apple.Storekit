@@ -165,7 +165,7 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="transactionId">Contains a transaction identifier.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns></returns>
-        public static async Task SendConsumptionInfoAsync(IAppStoreServerApiClient client, string transactionId, CancellationToken cancellationToken = default)
+        public static async Task SendConsumptionInfoAsync(this IAppStoreServerApiClient client, string transactionId, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
