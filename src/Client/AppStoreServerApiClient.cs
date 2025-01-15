@@ -26,7 +26,9 @@ namespace Talegen.Apple.Storekit.Client
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
     using Talegen.Apple.Storekit.Models;
+    using Talegen.Apple.Storekit.Models.Settings;
 
     /// <summary>
     /// This class contains the App Store Server API client implementation.
@@ -83,17 +85,27 @@ namespace Talegen.Apple.Storekit.Client
         };
 
         /// <summary>
+        /// Contains the Apple API settings.
+        /// </summary>
+        private readonly AppleApiSettings settings;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AppStoreServerApiClient" /> class.
         /// </summary>
         /// <param name="httpClientFactory">Contains the HTTP client factory.</param>
         /// <param name="bearerTokenAuthenticator">Contains the bearer token authenticator.</param>
         /// <param name="environment">Contains the environment type. Default is Production.</param>
-        public AppStoreServerApiClient(IHttpClientFactory httpClientFactory, IBearerTokenAuthenticator bearerTokenAuthenticator, EnvironmentType environment = EnvironmentType.Production)
+        public AppStoreServerApiClient(IHttpClientFactory httpClientFactory, IBearerTokenAuthenticator bearerTokenAuthenticator, IOptions<AppleApiSettings> settingsOptions)
         {
+            ArgumentNullException.ThrowIfNull(nameof(httpClientFactory));
+            ArgumentNullException.ThrowIfNull(nameof(bearerTokenAuthenticator));
+            ArgumentNullException.ThrowIfNull(nameof(settingsOptions));
+
             this.httpClientFactory = httpClientFactory;
             this.bearerTokenAuthenticator = bearerTokenAuthenticator;
+            this.settings = settingsOptions.Value;
 
-            switch (environment)
+            switch (this.settings.Environment)
             {
                 case EnvironmentType.Production:
                     this.baseUri = new Uri(PRODUCTION_URL);
@@ -105,7 +117,7 @@ namespace Talegen.Apple.Storekit.Client
                     this.baseUri = new Uri(LOCAL_TESTING_URL);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(environment), environment, "Invalid environment type.");
+                    throw new ArgumentOutOfRangeException(nameof(this.settings.Environment), this.settings.Environment, "Invalid environment type.");
             }
         }
 
