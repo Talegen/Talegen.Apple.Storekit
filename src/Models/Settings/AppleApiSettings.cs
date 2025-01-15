@@ -45,5 +45,10 @@ namespace Talegen.Apple.Storekit.Models.Settings
         /// Gets or sets the Apple team id.
         /// </summary>
         public string PrivateKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the production environment.
+        /// </summary>
+        public EnvironmentType Environment { get; set; } = EnvironmentType.Production;
     }
 }
