@@ -391,7 +391,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the UNIX time, in milliseconds, that the App Store signed the JSON Web Signature data.
         /// </summary>
         [JsonPropertyName("signedDate")]
-        public DateTime SignedDateTime { get; set; }
+        public long? SignedDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the unique identifier of the notification.

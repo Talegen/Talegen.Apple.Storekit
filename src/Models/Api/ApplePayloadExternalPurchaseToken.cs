@@ -41,7 +41,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the UNIX time, in milliseconds, when the system created the token.
         /// </summary>
         [JsonPropertyName("tokenCreationDate")]
-        public DateTime TokenCreationDateTime { get; set; }
+        public long? TokenCreationDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the app Apple ID for which the system generated the token.

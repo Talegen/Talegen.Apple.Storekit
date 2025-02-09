@@ -146,13 +146,29 @@ namespace Talegen.Apple.Storekit.Client
             {
                 if (method == HttpMethod.Post)
                 {
-                    HttpContent httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    HttpContent httpContent;
+                    if (requestBody != null)
+                    {
+                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    }
+                    else
+                    {
+                        httpContent = new StringContent(string.Empty);
+                    }
                     responseMessage = await client.PostAsync(apiUri, httpContent, cancellationToken);
                     responseMessage.EnsureSuccessStatusCode();
                 }
                 else if (method == HttpMethod.Put)
                 {
-                    HttpContent httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    HttpContent httpContent;
+                    if (requestBody != null)
+                    {
+                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    }
+                    else
+                    {
+                        httpContent = new StringContent(string.Empty);
+                    }
                     responseMessage = await client.PutAsync(apiUri, httpContent, cancellationToken);
                     responseMessage.EnsureSuccessStatusCode();
                 }
@@ -217,14 +233,31 @@ namespace Talegen.Apple.Storekit.Client
                 }
                 else if (method == HttpMethod.Post)
                 {
-                    HttpContent httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    HttpContent httpContent;
+                    if (requestBody != null)
+                    {
+                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    }
+                    else
+                    {
+                        httpContent = new StringContent(string.Empty);
+                    }
+
                     responseMessage = await client.PostAsync(apiUri, httpContent, cancellationToken);
                     responseMessage.EnsureSuccessStatusCode();
                     result = await responseMessage.Content.ReadFromJsonAsync<TReturn>(this.jsonSerializerOptions, cancellationToken);
                 }
                 else if (method == HttpMethod.Put)
                 {
-                    HttpContent httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    HttpContent httpContent;
+                    if (requestBody != null)
+                    {
+                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
+                    }
+                    else
+                    {
+                        httpContent = new StringContent(string.Empty);
+                    }
                     responseMessage = await client.PutAsync(apiUri, httpContent, cancellationToken);
                     responseMessage.EnsureSuccessStatusCode();
                     result = await responseMessage.Content.ReadFromJsonAsync<TReturn>(this.jsonSerializerOptions, cancellationToken);
