@@ -23,7 +23,6 @@
                        config.BundleId = "<Your Bundle Id>";
                        config.Environment = Talegen.Apple.Storekit.Models.EnvironmentType.Production;
                        config.PrivateKey = "-----Your Private Key-----";
-
                    });
                    services.AddTransient<TestApp>();
                }).UseConsoleLifetime();

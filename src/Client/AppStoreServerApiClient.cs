@@ -331,7 +331,7 @@ namespace Talegen.Apple.Storekit.Client
 
         private void SetEnvironment(EnvironmentType environment)
         {
-            switch (this.settings.Environment)
+            switch (environment)
             {
                 case EnvironmentType.Production:
                     this.baseUri = new Uri(PRODUCTION_URL);
