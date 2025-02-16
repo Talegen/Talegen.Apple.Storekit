@@ -7,14 +7,14 @@
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Apple App Store API Library</Title>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Company>Talegen, LLC</Company>
     <Description>A simple wrapper library for the Apple App Store API</Description>
     <Copyright>Copyright (c) Talegen, LLC. All rights reserved.</Copyright>
     <PackageIcon>Assets\logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/Talegen/Talegen.Apple.Storekit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Modifying some model changes for dates. fixing bug in empty post and puts.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated calls to support an environment override. This is needed for Apple suggested "try prod" then "sandbox" scenarios like subscription verifications.</PackageReleaseNotes>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

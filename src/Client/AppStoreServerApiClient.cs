@@ -68,7 +68,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <summary>
         /// Contains the base URI for the API.
         /// </summary>
-        private readonly Uri baseUri;
+        private Uri baseUri;
 
         /// <summary>
         /// Contains the HTTP client factory.
@@ -105,20 +105,7 @@ namespace Talegen.Apple.Storekit.Client
             this.bearerTokenAuthenticator = bearerTokenAuthenticator;
             this.settings = settingsOptions.Value;
 
-            switch (this.settings.Environment)
-            {
-                case EnvironmentType.Production:
-                    this.baseUri = new Uri(PRODUCTION_URL);
-                    break;
-                case EnvironmentType.Sandbox:
-                    this.baseUri = new Uri(SANDBOX_URL);
-                    break;
-                case EnvironmentType.LocalTesting:
-                    this.baseUri = new Uri(LOCAL_TESTING_URL);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(this.settings.Environment), this.settings.Environment, "Invalid environment type.");
-            }
+            this.SetEnvironment(this.settings.Environment);
         }
 
         /// <summary>
@@ -128,13 +115,19 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="method">Contains the HTTP method.</param>
         /// <param name="queryParameters">Contains additional query parameters.</param>
         /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
+        /// <param name="environment">Contains the environment type.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
 
-        public async Task MakeRequest(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
+        public async Task MakeRequest(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(path));
             ArgumentNullException.ThrowIfNull(nameof(method));
+
+            if (environment != null)
+            {
+                this.SetEnvironment(environment.Value);
+            }
 
             string queryString = queryParameters != null ? "?" + string.Join("&", queryParameters.Select(p => $"{p.Key}={UrlEncoder.Default.Encode(p.Value)}")) : string.Empty;
             Uri apiUri = new Uri(this.baseUri, path + queryString);
@@ -211,13 +204,19 @@ namespace Talegen.Apple.Storekit.Client
         /// <param name="method">Contains the HTTP method.</param>
         /// <param name="queryParameters">Contains additional query parameters.</param>
         /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
+        /// <param name="environment">Contains the environment type.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns teh data requested.</returns>
-        public async Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, CancellationToken cancellationToken = default)
+        public async Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(path));
             ArgumentNullException.ThrowIfNull(nameof(method));
 
+            if (environment != null)
+            {
+                this.SetEnvironment(environment.Value);
+            }
+            
             string queryString = queryParameters != null ? "?" + string.Join("&", queryParameters.Select(p => $"{p.Key}={UrlEncoder.Default.Encode(p.Value)}")) : string.Empty;
             Uri apiUri = new Uri(this.baseUri, path + queryString);
 
@@ -323,6 +322,29 @@ namespace Talegen.Apple.Storekit.Client
             }
 
             return client;
+        }
+
+        /// <summary>
+        /// this method is used to set the environment.
+        /// </summary>
+        /// <param name="environment">Contains the apple environment.</param>
+
+        private void SetEnvironment(EnvironmentType environment)
+        {
+            switch (this.settings.Environment)
+            {
+                case EnvironmentType.Production:
+                    this.baseUri = new Uri(PRODUCTION_URL);
+                    break;
+                case EnvironmentType.Sandbox:
+                    this.baseUri = new Uri(SANDBOX_URL);
+                    break;
+                case EnvironmentType.LocalTesting:
+                    this.baseUri = new Uri(LOCAL_TESTING_URL);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(this.settings.Environment), this.settings.Environment, "Invalid environment type.");
+            }
         }
     }
 }

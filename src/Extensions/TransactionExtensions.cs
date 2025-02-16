@@ -19,6 +19,7 @@ namespace Talegen.Apple.Storekit.Extensions
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Talegen.Apple.Storekit.Client;
+    using Talegen.Apple.Storekit.Models;
     using Talegen.Apple.Storekit.Models.Api;
 
     /// <summary>
@@ -46,7 +47,7 @@ namespace Talegen.Apple.Storekit.Extensions
         /// transaction.
         /// If the response is sorted in ASCENDING order, you receive the transaction again, with updated data.
         /// </remarks>
-        public static async Task<TransactionHistoryResponse> GetTransactionHistoryAsync(this IAppStoreServerApiClient client, string transactionId, TransactionHistoryRequest? requestModel = null, CancellationToken cancellationToken = default)
+        public static async Task<TransactionHistoryResponse> GetTransactionHistoryAsync(this IAppStoreServerApiClient client, string transactionId, TransactionHistoryRequest? requestModel = null, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
@@ -58,7 +59,7 @@ namespace Talegen.Apple.Storekit.Extensions
                 queryParameters = requestModel.ToQueryDictionary();
             }
 
-            var payloadResult = await client.MakeRequest<TransactionHistoryResponse>(endpoint, HttpMethod.Get, queryParameters, cancellationToken: cancellationToken);
+            var payloadResult = await client.MakeRequest<TransactionHistoryResponse>(endpoint, HttpMethod.Get, queryParameters, environment: environment, cancellationToken: cancellationToken);
 
             if (payloadResult != null)
             {
@@ -79,13 +80,13 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="transactionId">Contains the transaction id to retrieve.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns the <see cref="JwsTransactionDecodedPayload"/> returned.</returns>
-        public static async Task<JwsTransactionDecodedPayload> GetTransactionAsync(this IAppStoreServerApiClient client, string transactionId, CancellationToken cancellationToken = default)
+        public static async Task<JwsTransactionDecodedPayload> GetTransactionAsync(this IAppStoreServerApiClient client, string transactionId, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         { 
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
 
             string endpoint = $"/inApps/v1/transactions/{transactionId}";
-            var payloadResult = await client.MakeRequest<JwsTransaction>(endpoint, HttpMethod.Get, cancellationToken: cancellationToken);
+            var payloadResult = await client.MakeRequest<JwsTransaction>(endpoint, HttpMethod.Get, environment: environment, cancellationToken: cancellationToken);
             return payloadResult != null ? payloadResult.SignedTransactionInfo.DecodeJwtPayload<JwsTransactionDecodedPayload>() : null;
         }
     }
