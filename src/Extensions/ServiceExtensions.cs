@@ -26,7 +26,7 @@ namespace Talegen.Apple.Storekit.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Adds Redis distributed caching services to the specified <see cref="IServiceCollection" />.
+        /// Adds Apple API Client to specified <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <param name="setupAction">An <see cref="Action{RedisCacheOptions}" /> to configure the provided <see cref="RedisCacheOptions" />.</param>
