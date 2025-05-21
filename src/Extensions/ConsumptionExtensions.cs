@@ -167,12 +167,12 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="environment">Contains the environment override to use for the request.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns></returns>
-        public static async Task SendConsumptionInfoAsync(this IAppStoreServerApiClient client, string transactionId, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
+        public static async Task SendConsumptionInfoAsync(this IAppStoreServerApiClient client, string transactionId, ConsumptionRequest request, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(nameof(client));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
             string endpoint = $"/inApps/v1/transactions/consumption/{transactionId}";
-            await client.MakeRequest(endpoint, HttpMethod.Put, environment: environment, cancellationToken: cancellationToken);
+            await client.MakeRequest(endpoint, HttpMethod.Put, requestBody: request, environment: environment, cancellationToken: cancellationToken);
         }
     }
 }
