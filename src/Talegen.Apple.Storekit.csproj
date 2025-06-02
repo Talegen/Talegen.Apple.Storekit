@@ -7,14 +7,14 @@
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Apple App Store API Library</Title>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Company>Talegen, LLC</Company>
     <Description>A simple wrapper library for the Apple App Store API</Description>
     <Copyright>Copyright (c) Talegen, LLC. All rights reserved.</Copyright>
     <PackageIcon>Assets\logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/Talegen/Talegen.Apple.Storekit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Fix bug in consumption extension.</PackageReleaseNotes>
+    <PackageReleaseNotes>Update dependencies.</PackageReleaseNotes>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -38,8 +38,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.5" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.10.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.10.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.11.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.11.0" />
   </ItemGroup>
 
 </Project>

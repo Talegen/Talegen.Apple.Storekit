@@ -21,7 +21,6 @@ namespace Talegen.Apple.Storekit.Extensions
     using Talegen.Apple.Storekit.Models;
     using Talegen.Apple.Storekit.Models.Api;
 
-
     /// <summary>
     /// This class contains extension methods for consumption related operations.
     /// </summary>
