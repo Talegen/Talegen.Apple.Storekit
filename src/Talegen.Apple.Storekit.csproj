@@ -7,7 +7,7 @@
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Apple App Store API Library</Title>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <Company>Talegen, LLC</Company>
     <Description>A simple wrapper library for the Apple App Store API</Description>
     <Copyright>Copyright (c) Talegen, LLC. All rights reserved.</Copyright>
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
   </ItemGroup>
