@@ -20,12 +20,11 @@
                    {
 
 
-                       config.IssuerId = "9e59125a-eae7-4bfb-a8b6-d650b52c2849";
-                       config.KeyId = "4QZCKM7669";
-                       config.BundleId = "com.sweptdate.app";
+                       config.IssuerId = "<Your IssuerId Guid>";
+                       config.KeyId = "<Your Key Id>";
+                       config.BundleId = "<Your Bundle Id>";
                        config.Environment = Talegen.Apple.Storekit.Models.EnvironmentType.Production;
-                       config.PrivateKey = "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg/ZnBax74oADZaoUF\nIcQ4FSzKBatMlsmoqsf9jauHFD+gCgYIKoZIzj0DAQehRANCAARXJlU8o/JxTd7M\nZWlCdB6+eO/iXm3ZRcRgXh/9pm8Dtz5b/sUxiQiuvf4cNxuwS3aPt+BvaHB34ViN\n2cRtrx2n\n-----END PRIVATE KEY-----";
-
+                       config.PrivateKey = "-----Your Private Key-----";
                    });
                    services.AddTransient<TestApp>();
                }).UseConsoleLifetime();
