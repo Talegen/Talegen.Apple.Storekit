@@ -58,7 +58,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// This property is available for apps that users download from the App Store. It isn’t present in the sandbox environment.
         /// </summary>
         [JsonPropertyName("appAppleId")]
-        public int AppAppleId { get; set; }
+        public long AppAppleId { get; set; }
 
         /// <summary>
         /// Gets or sets the bundle identifier of the app.

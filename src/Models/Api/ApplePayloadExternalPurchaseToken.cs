@@ -47,7 +47,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the app Apple ID for which the system generated the token.
         /// </summary>
         [JsonPropertyName("appAppleId")]
-        public int AppAppleId { get; set; }
+        public long AppAppleId { get; set; }
 
         /// <summary>
         /// Gets or sets the bundle identifier of the app.
