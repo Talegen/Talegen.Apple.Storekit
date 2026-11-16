@@ -28,7 +28,11 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
            dotnet-version: '8.0.x'
-           
+
+    # Run the unit tests; a failure stops the package from being built or published
+    - name: Test
+      run: dotnet test ./test/Talegen.Apple.Storekit.Tests/Talegen.Apple.Storekit.Tests.csproj --configuration Release --logger "trx" --results-directory ${{github.workspace}}/TestResults
+
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet build ./src/Talegen.Apple.Storekit.csproj --configuration Release --output ${{env.NuGetDirectory}}
 

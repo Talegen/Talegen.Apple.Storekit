@@ -65,6 +65,7 @@ namespace Talegen.Apple.Storekit.Client
         {
             this.HttpStatusCode = httpStatusCode;
             this.ErrorCode = apiError?.ErrorCode;
+            this.ApiErrorMessage = apiError?.ErrorMessage;
         }
 
         /// <summary>
@@ -90,6 +91,24 @@ namespace Talegen.Apple.Storekit.Client
         /// Gets the error code.
         /// </summary>
         public AppleErrorCodes? ErrorCode { get; }
+
+        /// <summary>
+        /// Gets the error message returned by Apple, if any.
+        /// </summary>
+        public string? ApiErrorMessage { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether Apple indicated the request can be retried
+        /// (rate limiting, a server error, or one of the "retryable" error codes).
+        /// </summary>
+        public bool IsRetryable =>
+            this.HttpStatusCode == System.Net.HttpStatusCode.TooManyRequests
+            || (this.HttpStatusCode.HasValue && (int)this.HttpStatusCode.Value >= 500)
+            || this.ErrorCode is AppleErrorCodes.AccountNotFoundRetryable
+                or AppleErrorCodes.AppNotFoundRetryable
+                or AppleErrorCodes.OriginalTransactionIdNotFoundRetryable
+                or AppleErrorCodes.GeneralInternalRetryable
+                or AppleErrorCodes.RateLimitExceeded;
 
         /// <summary>
         /// Returns a string representation of the exception.

@@ -5,7 +5,6 @@
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Talegen.Apple.Storekit.Extensions;
-    using static System.Net.Mime.MediaTypeNames;
 
     internal class Program
     {
@@ -15,7 +14,6 @@
             var builder = new HostBuilder()
                .ConfigureServices((hostContext, services) =>
                {
-                   services.AddHttpClient();
                    services.AddAppleApiClient(config =>
                    {
 
@@ -42,7 +40,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error Occured");
+                    Console.WriteLine($"Error occurred: {ex.Message}");
                 }
             }
         }

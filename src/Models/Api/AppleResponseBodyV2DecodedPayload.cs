@@ -17,11 +17,13 @@ namespace Talegen.Apple.Storekit.Models.Api
 {
     using System.Runtime.Serialization;
     using System.Text.Json.Serialization;
+    using Talegen.Apple.Storekit.Models.Converters;
+    using Talegen.Apple.Storekit.Extensions;
     
     /// <summary>
     /// Contains an enumerated list of allowed notification types.
     /// </summary>
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<AppleStoreNotificationType>))]
+    [JsonConverter(typeof(EnumMemberJsonConverter<AppleStoreNotificationType>))]
     public enum AppleStoreNotificationType
     {
         /// <summary>
@@ -196,12 +198,18 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// </summary>
         [EnumMember(Value = "ONE_TIME_CHARGE")]
         OneTimeCharge,
+
+        /// <summary>
+        /// A notification type that this version of the library does not recognize. Apple adds notification types over time;
+        /// unrecognized values deserialize to this member instead of failing.
+        /// </summary>
+        Unknown = -1,
     }
 
     /// <summary>
     /// Contains an enumerated list of sub-field notification types.
     /// </summary>
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<AppleStoreSubNotificationType>))]
+    [JsonConverter(typeof(EnumMemberJsonConverter<AppleStoreSubNotificationType>))]
     public enum AppleStoreSubNotificationType
     {
         /// <summary>
@@ -333,6 +341,11 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// </summary>
         [EnumMember(Value = "UNREPORTED")]
         Unreported,
+
+        /// <summary>
+        /// A notification subtype that this version of the library does not recognize.
+        /// </summary>
+        Unknown = -1,
     }
 
     /// <summary>
@@ -356,8 +369,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// <summary>
         /// Gets or sets a value that further describes an event of type notificationType. It’s present only for specific version 2 notifications.
         /// </summary>
+        /// <remarks>This value is <c>null</c> when the notification has no subtype.</remarks>
         [JsonPropertyName("subtype")]
-        public AppleStoreSubNotificationType SubNotificationType { get; set; }
+        public AppleStoreSubNotificationType? SubNotificationType { get; set; }
 
         /// <summary>
         /// Gets or sets the object that contains the app metadata and signed renewal and transaction information.
@@ -392,6 +406,12 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// </summary>
         [JsonPropertyName("signedDate")]
         public long? SignedDateTime { get; set; }
+
+        /// <summary>
+        /// Gets the signed date as a UTC <see cref="DateTime"/>.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? SignedDateUtc => this.SignedDateTime.ToUtcDateTime();
 
         /// <summary>
         /// Gets or sets the unique identifier of the notification.

@@ -29,7 +29,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         public string Kid { get; set; }
 
         /// <summary>
-        /// Gets or sets the key type.
+        /// Gets or sets the X.509 certificate chain (base64 DER), leaf first.
         /// </summary>
         [JsonPropertyName("x5c")]
         public List<string> X5c { get; set; } = new List<string>();

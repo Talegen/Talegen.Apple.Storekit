@@ -26,8 +26,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// <summary>
         /// Gets or sets the application apple Id.
         /// </summary>
+        /// <remarks>Apple returns this as a number; it is absent in the sandbox environment.</remarks>
         [JsonPropertyName("appAppleId")]
-        public string AppAppleId { get; set; }
+        public long? AppAppleId { get; set; }
 
         /// <summary>
         /// Gets or sets the bundle identifier.
@@ -45,6 +46,6 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the subscription data.
         /// </summary>
         [JsonPropertyName("data")]
-        public List<SubscriptionGroupIdentifierItem> Data { get; set; }
+        public List<SubscriptionGroupIdentifierItem> Data { get; set; } = new List<SubscriptionGroupIdentifierItem>();
     }
 }
