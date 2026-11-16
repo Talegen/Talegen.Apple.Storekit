@@ -7,7 +7,7 @@
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Apple App Store API Library</Title>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Company>Talegen, LLC</Company>
     <Description>A .NET client for the Apple App Store Server API and App Store Server Notifications V2, including JWS signature verification.</Description>
     <Copyright>Copyright (c) Talegen, LLC. All rights reserved.</Copyright>
