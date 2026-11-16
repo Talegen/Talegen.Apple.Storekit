@@ -1,6 +1,6 @@
 # Talegen.Apple.Storekit
 
-A .NET 8 client for the Apple App Store Server API and App Store Server Notifications V2, including verification of
+A .NET client (targets .NET 8 and .NET 10) for the Apple App Store Server API and App Store Server Notifications V2, including verification of
 Apple-signed data (JWS).
 
 ## Register

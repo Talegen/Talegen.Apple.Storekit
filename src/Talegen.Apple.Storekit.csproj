@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Apple App Store API Library</Title>
-    <Version>2.0.3</Version>
+    <Version>2.1.0</Version>
     <Company>Talegen, LLC</Company>
     <Description>A .NET client for the Apple App Store Server API and App Store Server Notifications V2, including JWS signature verification.</Description>
     <Copyright>Copyright (c) Talegen, LLC. All rights reserved.</Copyright>
     <PackageIcon>Assets\logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/Talegen/Talegen.Apple.Storekit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Fixes enum/model deserialization, adds signed-data (JWS) verification, new endpoints and unit tests. Contains breaking changes; see CHANGELOG.md.</PackageReleaseNotes>
+    <PackageReleaseNotes>Adds .NET 10 target alongside .NET 8; fixes .NET 8 dependency support (Microsoft.Extensions.Http 10.x), package icon/readme packing, and a stray logo.ico content file. See CHANGELOG.md.</PackageReleaseNotes>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -22,22 +22,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Assets\logo.ico" />
+    <!-- application icon only; must not be packed as content into consumers' projects -->
+    <Content Include="Assets\logo.ico" Pack="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Update="PackageReadMe.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <!-- Explicit Remove + Include (not Update): with multiple target frameworks, pack runs in the outer
+         build, where the SDK's default None glob isn't evaluated, so Update would match nothing. -->
+    <None Remove="Assets\logo.png;PackageReadMe.md" />
+    <None Include="Assets\logo.png" Pack="true" PackagePath="Assets\" />
+    <None Include="PackageReadMe.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.23.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>

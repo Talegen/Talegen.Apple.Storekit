@@ -175,10 +175,19 @@
             var leaf = leafRequest.Create(intermediate, notBefore, notAfter, new byte[] { 5, 6, 7, 8 });
 
             return new TestCertificateChain(
-                new X509Certificate2(root.Export(X509ContentType.Cert)),
-                new X509Certificate2(intermediate.Export(X509ContentType.Cert)),
-                new X509Certificate2(leaf.RawData),
+                Load(root.Export(X509ContentType.Cert)),
+                Load(intermediate.Export(X509ContentType.Cert)),
+                Load(leaf.RawData),
                 leafKey);
+        }
+
+        private static X509Certificate2 Load(byte[] der)
+        {
+#if NET9_0_OR_GREATER
+            return X509CertificateLoader.LoadCertificate(der);
+#else
+            return new X509Certificate2(der);
+#endif
         }
 
         public void Dispose()
