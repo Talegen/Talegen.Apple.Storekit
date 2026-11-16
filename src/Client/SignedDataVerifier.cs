@@ -298,9 +298,9 @@ namespace Talegen.Apple.Storekit.Client
 
             try
             {
-                certificates = header.CertificateChain.Select(c => new X509Certificate2(Convert.FromBase64String(c))).ToList();
+                certificates = header.CertificateChain.Select(c => new X509Certificate2(Convert.FromBase64String(c ?? throw new FormatException("Null certificate entry.")))).ToList();
             }
-            catch (Exception ex) when (ex is FormatException || ex is CryptographicException)
+            catch (Exception ex) when (ex is FormatException || ex is CryptographicException || ex is ArgumentException)
             {
                 throw new SignedDataVerificationException(VerificationStatus.InvalidCertificate, "The x5c header contains an invalid certificate.", ex);
             }
@@ -354,6 +354,9 @@ namespace Talegen.Apple.Storekit.Client
             chain.ChainPolicy.ExtraStore.Add(intermediate);
             chain.ChainPolicy.RevocationMode = this.options.EnableOnlineChecks ? X509RevocationMode.Online : X509RevocationMode.NoCheck;
             chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+
+            // the full chain is supplied in the x5c header; never fetch issuer certificates from URLs embedded in untrusted input.
+            chain.ChainPolicy.DisableCertificateDownloads = true;
             chain.ChainPolicy.VerificationTime = this.GetVerificationTime(payload).UtcDateTime;
             chain.ChainPolicy.VerificationTimeIgnored = false;
 
@@ -391,6 +394,10 @@ namespace Talegen.Apple.Storekit.Client
             {
                 return now;
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new SignedDataVerificationException(VerificationStatus.InvalidFormat, "The payload signedDate is out of range.", ex);
+            }
         }
 
         /// <summary>
@@ -409,7 +416,8 @@ namespace Talegen.Apple.Storekit.Client
                 throw new SignedDataVerificationException(VerificationStatus.InvalidEnvironment, $"The environment \"{environment}\" does not match the expected environment {this.options.Environment}.");
             }
 
-            if (checkAppAppleId && this.options.AppAppleId != null && this.options.Environment == EnvironmentType.Production && appAppleId != this.options.AppAppleId)
+            // Apple omits appAppleId outside Production, so the check applies to Production payloads, whatever environment is configured.
+            if (checkAppAppleId && this.options.AppAppleId != null && EnvironmentMatches(EnvironmentType.Production, environment) && appAppleId != this.options.AppAppleId)
             {
                 throw new SignedDataVerificationException(VerificationStatus.InvalidAppIdentifier, $"The app Apple ID \"{appAppleId}\" does not match the expected app.");
             }

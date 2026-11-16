@@ -78,6 +78,19 @@
         }
 
         [Fact]
+        public async Task GetSubscriptionStatusAsync_NullStatus_BindsToCurrentOverload()
+        {
+            var handler = new FakeHttpMessageHandler().Enqueue(HttpStatusCode.OK, Json(new { data = Array.Empty<object>() }));
+            var client = ClientFactory.Create(handler);
+
+            // must compile without CS0121 and send no status filter.
+            await client.GetSubscriptionStatusAsync("1000", null, environment: Talegen.Apple.Storekit.Models.EnvironmentType.Sandbox);
+
+            Assert.Equal(string.Empty, handler.Requests[0].Request.RequestUri!.Query);
+            Assert.Equal("api.storekit-sandbox.itunes.apple.com", handler.Requests[0].Request.RequestUri!.Host);
+        }
+
+        [Fact]
         public async Task SendConsumptionInfoAsync_PutsToConsumptionEndpoint()
         {
             var handler = new FakeHttpMessageHandler().Enqueue(HttpStatusCode.Accepted);

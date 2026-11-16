@@ -64,9 +64,10 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
         /// <returns>Returns the subscription status.</returns>
         [Obsolete("The status filter is a subscription status. Use the overload that takes ApplePayloadMetadataStatusType.")]
-        public static Task<SubscriptionStatusResponse> GetSubscriptionStatusAsync(this IAppStoreServerApiClient client, string transactionId, AppleAutoRenewStatuses? status, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
+        public static Task<SubscriptionStatusResponse> GetSubscriptionStatusAsync(this IAppStoreServerApiClient client, string transactionId, AppleAutoRenewStatuses status, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
-            return client.GetSubscriptionStatusAsync(transactionId, status.HasValue ? (ApplePayloadMetadataStatusType)(int)status.Value : (ApplePayloadMetadataStatusType?)null, environment, cancellationToken);
+            // the status parameter is non-nullable so that GetSubscriptionStatusAsync(id, null) binds unambiguously to the current overload.
+            return client.GetSubscriptionStatusAsync(transactionId, (ApplePayloadMetadataStatusType)(int)status, environment, cancellationToken);
         }
 
         /// <summary>

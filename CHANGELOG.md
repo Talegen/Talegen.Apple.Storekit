@@ -46,3 +46,5 @@
 - `AppleOfferType.Introductory` changed from `0` to `1`.
 - `BearerTokenAuthenticator` validates its arguments and the private key in the constructor, and is registered as a singleton.
 - `AppleErrorCodes.OrigionalTransactionIdNotFoundRetryable` is obsolete; use `OriginalTransactionIdNotFoundRetryable`.
+- The obsolete `GetSubscriptionStatusAsync(..., AppleAutoRenewStatuses status, ...)` overload takes a non-nullable
+  status, so `GetSubscriptionStatusAsync(id, null)` binds to the current overload.

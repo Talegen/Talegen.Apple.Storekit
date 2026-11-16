@@ -1,6 +1,7 @@
 ﻿namespace Talegen.Apple.Storekit.Tests.Client
 {
     using System.Security.Cryptography;
+    using Microsoft.IdentityModel.Tokens;
     using Talegen.Apple.Storekit.Client;
     using Talegen.Apple.Storekit.Models;
     using Talegen.Apple.Storekit.Models.Api;
@@ -150,6 +151,41 @@
             var verifier = this.CreateVerifier(o => { o.BundleId = null; o.Environment = null; o.AppAppleId = null; });
             var payload = verifier.VerifyAndDecodeNotification(Jws.Signed(Notification(bundleId: "x", environment: "Sandbox"), this.chain));
             Assert.Equal("x", payload.Data!.BundleId);
+        }
+
+        [Fact]
+        public void WrongAppAppleId_IsRejected_WhenEnvironmentNotConfigured()
+        {
+            var verifier = this.CreateVerifier(o => o.Environment = null);
+            var ex = Assert.Throws<SignedDataVerificationException>(() => verifier.VerifyAndDecodeNotification(Jws.Signed(Notification(appAppleId: 999), this.chain)));
+            Assert.Equal(VerificationStatus.InvalidAppIdentifier, ex.Status);
+        }
+
+        [Fact]
+        public void SandboxPayload_SkipsAppAppleIdCheck_WhenEnvironmentNotConfigured()
+        {
+            var verifier = this.CreateVerifier(o => o.Environment = null);
+            var payload = verifier.VerifyAndDecodeNotification(Jws.Signed(Notification(environment: "Sandbox", appAppleId: 999), this.chain));
+            Assert.Equal("Sandbox", payload.Data!.Environment);
+        }
+
+        [Fact]
+        public void NullCertificateEntry_IsRejectedAsInvalidCertificate()
+        {
+            string header = Base64UrlEncoder.Encode("{\"alg\":\"ES256\",\"x5c\":[null,null,null]}");
+            string jws = $"{header}.{Jws.Unsigned(Notification()).Split('.')[1]}.c2ln";
+
+            var ex = Assert.Throws<SignedDataVerificationException>(() => this.CreateVerifier().VerifyAndDecodeNotification(jws));
+            Assert.Equal(VerificationStatus.InvalidCertificate, ex.Status);
+        }
+
+        [Fact]
+        public void OutOfRangeSignedDate_IsRejectedAsInvalidFormat()
+        {
+            string jws = Jws.Signed("{\"notificationType\":\"TEST\",\"signedDate\":9223372036854775807}", this.chain);
+
+            var ex = Assert.Throws<SignedDataVerificationException>(() => this.CreateVerifier().VerifyAndDecodeNotification(jws));
+            Assert.Equal(VerificationStatus.InvalidFormat, ex.Status);
         }
 
         [Fact]
