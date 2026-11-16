@@ -95,6 +95,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         NotDeliveredDueToOtherReason = 5,
     }
 
+    /// <summary>
+    /// This enumeration represents a range of US dollar amounts.
+    /// </summary>
     public enum AppleDollarAmount
     {
         /// <summary>
@@ -139,6 +142,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         Over2000Dollars = 7,
     }
 
+    /// <summary>
+    /// This enumeration represents the platform on which the customer consumed the in-app purchase.
+    /// </summary>
     public enum PlatformType
     {
         /// <summary>
@@ -157,6 +163,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         NonApple = 2,
     }
 
+    /// <summary>
+    /// This enumeration represents your preference as to whether Apple should grant a refund.
+    /// </summary>
     public enum AppleRefundPreferenceType
     {
         /// <summary>

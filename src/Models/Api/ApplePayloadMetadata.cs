@@ -58,7 +58,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// This property is available for apps that users download from the App Store. It isn’t present in the sandbox environment.
         /// </summary>
         [JsonPropertyName("appAppleId")]
-        public long AppAppleId { get; set; }
+        public long? AppAppleId { get; set; }
 
         /// <summary>
         /// Gets or sets the bundle identifier of the app.
@@ -104,6 +104,12 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// This field appears only for notifications sent for auto-renewable subscriptions.
         /// </summary>
         [JsonPropertyName("status")]
-        public ApplePayloadMetadataStatusType Status { get; set; }
+        public ApplePayloadMetadataStatusType? Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the app download transaction (present for newer notifications).
+        /// </summary>
+        [JsonPropertyName("appTransactionId")]
+        public string? AppTransactionId { get; set; }
     }
 }

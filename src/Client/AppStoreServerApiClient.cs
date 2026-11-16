@@ -1,7 +1,7 @@
 ﻿/*
  * Talegen Apple Storekit Library
  * (c) Copyright Talegen, LLC.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,8 @@ namespace Talegen.Apple.Storekit.Client
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Json;
+    using System.Net.Http.Headers;
     using System.Text;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
@@ -38,17 +37,22 @@ namespace Talegen.Apple.Storekit.Client
         /// <summary>
         /// Contains the base URL for the Production API.
         /// </summary>
-        private const string PRODUCTION_URL = "https://api.storekit.itunes.apple.com";
+        public const string ProductionUrl = "https://api.storekit.itunes.apple.com";
 
         /// <summary>
         /// Contains the base URL for the Sandbox API.
         /// </summary>
-        private const string SANDBOX_URL = "https://api.storekit-sandbox.itunes.apple.com";
+        public const string SandboxUrl = "https://api.storekit-sandbox.itunes.apple.com";
 
         /// <summary>
         /// Contains the base URL for Local Testing.
         /// </summary>
-        private const string LOCAL_TESTING_URL = "https://local-testing-base-url";
+        public const string LocalTestingUrl = "https://local-testing-base-url";
+
+        /// <summary>
+        /// Contains the name of the named <see cref="HttpClient"/> used by this client.
+        /// </summary>
+        public const string HttpClientName = "Talegen.Apple.Storekit";
 
         /// <summary>
         /// Contains the User-Agent string for the API client.
@@ -56,9 +60,18 @@ namespace Talegen.Apple.Storekit.Client
         private const string USER_AGENT = "app-store-server-library-dotnet/{0}";
 
         /// <summary>
-        /// Contains the JSON content type.
+        /// Contains the JSON media type.
         /// </summary>
-        private const string JSON = "application/json; charset=utf-8";
+        private const string JSON = "application/json";
+
+        /// <summary>
+        /// Contains the shared JSON serializer options.
+        /// </summary>
+        internal static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
 
         /// <summary>
         /// Contains the bearer token authenticator.
@@ -66,23 +79,9 @@ namespace Talegen.Apple.Storekit.Client
         private readonly IBearerTokenAuthenticator bearerTokenAuthenticator;
 
         /// <summary>
-        /// Contains the base URI for the API.
-        /// </summary>
-        private Uri baseUri;
-
-        /// <summary>
         /// Contains the HTTP client factory.
         /// </summary>
         private readonly IHttpClientFactory httpClientFactory;
-
-        /// <summary>
-        /// Contains the JSON serializer options.
-        /// </summary>
-        private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
 
         /// <summary>
         /// Contains the Apple API settings.
@@ -94,256 +93,174 @@ namespace Talegen.Apple.Storekit.Client
         /// </summary>
         /// <param name="httpClientFactory">Contains the HTTP client factory.</param>
         /// <param name="bearerTokenAuthenticator">Contains the bearer token authenticator.</param>
-        /// <param name="environment">Contains the environment type. Default is Production.</param>
+        /// <param name="settingsOptions">Contains the Apple API settings.</param>
         public AppStoreServerApiClient(IHttpClientFactory httpClientFactory, IBearerTokenAuthenticator bearerTokenAuthenticator, IOptions<AppleApiSettings> settingsOptions)
         {
-            ArgumentNullException.ThrowIfNull(nameof(httpClientFactory));
-            ArgumentNullException.ThrowIfNull(nameof(bearerTokenAuthenticator));
-            ArgumentNullException.ThrowIfNull(nameof(settingsOptions));
+            ArgumentNullException.ThrowIfNull(httpClientFactory);
+            ArgumentNullException.ThrowIfNull(bearerTokenAuthenticator);
+            ArgumentNullException.ThrowIfNull(settingsOptions);
 
             this.httpClientFactory = httpClientFactory;
             this.bearerTokenAuthenticator = bearerTokenAuthenticator;
-            this.settings = settingsOptions.Value;
+            this.settings = settingsOptions.Value ?? throw new ArgumentException("Settings value must not be null.", nameof(settingsOptions));
 
-            this.SetEnvironment(this.settings.Environment);
+            // validate the configured environment eagerly so misconfiguration surfaces at construction.
+            GetBaseUri(this.settings.Environment);
         }
 
-        /// <summary>
-        /// This method is used to make a request to the Apple App Store API.
-        /// </summary>
-        /// <param name="path">Contains the API path.</param>
-        /// <param name="method">Contains the HTTP method.</param>
-        /// <param name="queryParameters">Contains additional query parameters.</param>
-        /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
-        /// <param name="environment">Contains the environment type.</param>
-        /// <param name="cancellationToken">Contains an optional cancellation token.</param>
-        /// <returns>Returns teh data requested.</returns>
-
+        /// <inheritdoc />
         public async Task MakeRequest(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(nameof(path));
-            ArgumentNullException.ThrowIfNull(nameof(method));
-
-            if (environment != null)
-            {
-                this.SetEnvironment(environment.Value);
-            }
-
-            string queryString = queryParameters != null ? "?" + string.Join("&", queryParameters.Select(p => $"{p.Key}={UrlEncoder.Default.Encode(p.Value)}")) : string.Empty;
-            Uri apiUri = new Uri(this.baseUri, path + queryString);
-
-            HttpResponseMessage? responseMessage = null;
-            using var client = this.CreateApiHttpClient();
-
-            try
-            {
-                if (method == HttpMethod.Post)
-                {
-                    HttpContent httpContent;
-                    if (requestBody != null)
-                    {
-                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
-                    }
-                    else
-                    {
-                        httpContent = new StringContent(string.Empty);
-                    }
-                    responseMessage = await client.PostAsync(apiUri, httpContent, cancellationToken);
-                    responseMessage.EnsureSuccessStatusCode();
-                }
-                else if (method == HttpMethod.Put)
-                {
-                    HttpContent httpContent;
-                    if (requestBody != null)
-                    {
-                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
-                    }
-                    else
-                    {
-                        httpContent = new StringContent(string.Empty);
-                    }
-                    responseMessage = await client.PutAsync(apiUri, httpContent, cancellationToken);
-                    responseMessage.EnsureSuccessStatusCode();
-                }
-                else if (method == HttpMethod.Delete)
-                {
-                    responseMessage = await client.DeleteAsync(apiUri, cancellationToken);
-                    responseMessage.EnsureSuccessStatusCode();
-                }
-            }
-            catch (HttpRequestException rex)
-            {
-                AppleApiError appleApiError = null;
-
-                if (responseMessage != null)
-                {
-                    // check to see if API error model was returned in content
-                    appleApiError = await responseMessage.Content.ReadFromJsonAsync<AppleApiError>(this.jsonSerializerOptions, cancellationToken);
-                }
-
-                if (appleApiError != null)
-                {
-                    throw new AppleApiException(rex.StatusCode != null ? rex.StatusCode.Value : HttpStatusCode.InternalServerError, appleApiError, appleApiError.ErrorMessage ?? rex.Message, rex);
-                }
-                else
-                {
-                    throw new AppleApiException(rex.StatusCode != null ? rex.StatusCode.Value : HttpStatusCode.InternalServerError, rex);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new AppleApiException(HttpStatusCode.InternalServerError, ex);
-            }
+            using var response = await this.SendAsync(path, method, queryParameters, requestBody, environment, cancellationToken).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// This method is used to make a request to the Apple App Store API.
-        /// </summary>
-        /// <typeparam name="T">Contains the data type to return.</typeparam>
-        /// <param name="path">Contains the API path.</param>
-        /// <param name="method">Contains the HTTP method.</param>
-        /// <param name="queryParameters">Contains additional query parameters.</param>
-        /// <param name="requestBody">Contains a request body for POST/PUT calls.</param>
-        /// <param name="environment">Contains the environment type.</param>
-        /// <param name="cancellationToken">Contains an optional cancellation token.</param>
-        /// <returns>Returns teh data requested.</returns>
+        /// <inheritdoc />
         public async Task<TReturn> MakeRequest<TReturn>(string path, HttpMethod method, Dictionary<string, string>? queryParameters = null, object? requestBody = null, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(nameof(path));
-            ArgumentNullException.ThrowIfNull(nameof(method));
-
-            if (environment != null)
-            {
-                this.SetEnvironment(environment.Value);
-            }
-            
-            string queryString = queryParameters != null ? "?" + string.Join("&", queryParameters.Select(p => $"{p.Key}={UrlEncoder.Default.Encode(p.Value)}")) : string.Empty;
-            Uri apiUri = new Uri(this.baseUri, path + queryString);
-
-            TReturn? result;
-            HttpResponseMessage? responseMessage = null;
-            using var client = this.CreateApiHttpClient();
+            using var response = await this.SendAsync(path, method, queryParameters, requestBody, environment, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                if (method == HttpMethod.Get)
+                if (response.Content.Headers.ContentLength == 0)
                 {
-                    result = await client.GetFromJsonAsync<TReturn>(apiUri, this.jsonSerializerOptions, cancellationToken);
+                    return default!;
                 }
-                else if (method == HttpMethod.Post)
-                {
-                    HttpContent httpContent;
-                    if (requestBody != null)
-                    {
-                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
-                    }
-                    else
-                    {
-                        httpContent = new StringContent(string.Empty);
-                    }
 
-                    responseMessage = await client.PostAsync(apiUri, httpContent, cancellationToken);
-                    responseMessage.EnsureSuccessStatusCode();
-                    result = await responseMessage.Content.ReadFromJsonAsync<TReturn>(this.jsonSerializerOptions, cancellationToken);
-                }
-                else if (method == HttpMethod.Put)
-                {
-                    HttpContent httpContent;
-                    if (requestBody != null)
-                    {
-                        httpContent = new StringContent(JsonSerializer.Serialize(requestBody, this.jsonSerializerOptions), Encoding.UTF8, JSON);
-                    }
-                    else
-                    {
-                        httpContent = new StringContent(string.Empty);
-                    }
-                    responseMessage = await client.PutAsync(apiUri, httpContent, cancellationToken);
-                    responseMessage.EnsureSuccessStatusCode();
-                    result = await responseMessage.Content.ReadFromJsonAsync<TReturn>(this.jsonSerializerOptions, cancellationToken);
-                }
-                else if (method == HttpMethod.Delete)
-                { 
-                    result = await client.DeleteFromJsonAsync<TReturn>(apiUri, this.jsonSerializerOptions);
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid HTTP method.");
-                }
+                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                return (await JsonSerializer.DeserializeAsync<TReturn>(stream, JsonOptions, cancellationToken).ConfigureAwait(false))!;
+            }
+            catch (JsonException jex)
+            {
+                throw new AppleApiException(response.StatusCode, jex);
+            }
+        }
+
+        /// <summary>
+        /// This method is used to build the absolute request URI.
+        /// </summary>
+        /// <param name="baseUri">Contains the base URI.</param>
+        /// <param name="path">Contains the API path.</param>
+        /// <param name="queryParameters">Contains optional query parameters.</param>
+        /// <returns>Returns the absolute URI.</returns>
+        internal static Uri BuildUri(Uri baseUri, string path, IEnumerable<KeyValuePair<string, string>>? queryParameters)
+        {
+            var builder = new StringBuilder(path);
+            var parameters = queryParameters?.Where(p => !string.IsNullOrEmpty(p.Key)).ToList();
+
+            if (parameters != null && parameters.Count > 0)
+            {
+                builder.Append('?');
+                builder.Append(string.Join("&", parameters.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value ?? string.Empty)}")));
+            }
+
+            return new Uri(baseUri, builder.ToString());
+        }
+
+        /// <summary>
+        /// This method returns the base URI for the specified environment.
+        /// </summary>
+        /// <param name="environment">Contains the apple environment.</param>
+        /// <returns>Returns the base URI.</returns>
+        internal static Uri GetBaseUri(EnvironmentType environment)
+        {
+            return environment switch
+            {
+                EnvironmentType.Production => new Uri(ProductionUrl),
+                EnvironmentType.Sandbox => new Uri(SandboxUrl),
+                EnvironmentType.LocalTesting => new Uri(LocalTestingUrl),
+                _ => throw new ArgumentOutOfRangeException(nameof(environment), environment, "Invalid environment type."),
+            };
+        }
+
+        /// <summary>
+        /// This method sends the request and converts non-success responses into <see cref="AppleApiException"/>.
+        /// </summary>
+        private async Task<HttpResponseMessage> SendAsync(string path, HttpMethod method, Dictionary<string, string>? queryParameters, object? requestBody, EnvironmentType? environment, CancellationToken cancellationToken)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+            ArgumentNullException.ThrowIfNull(method);
+
+            if (method != HttpMethod.Get && method != HttpMethod.Post && method != HttpMethod.Put && method != HttpMethod.Delete)
+            {
+                throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid HTTP method.");
+            }
+
+            // the environment override applies to this request only; the configured environment is never mutated.
+            Uri apiUri = BuildUri(GetBaseUri(environment ?? this.settings.Environment), path, queryParameters);
+
+            using var request = new HttpRequestMessage(method, apiUri);
+            request.Headers.UserAgent.ParseAdd(string.Format(USER_AGENT, typeof(AppStoreServerApiClient).Assembly.GetName().Version));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", this.bearerTokenAuthenticator.GenerateToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(JSON));
+
+            if (requestBody != null)
+            {
+                request.Content = new StringContent(JsonSerializer.Serialize(requestBody, requestBody.GetType(), JsonOptions), Encoding.UTF8, JSON);
+            }
+            else if (method == HttpMethod.Post || method == HttpMethod.Put)
+            {
+                request.Content = new StringContent(string.Empty, Encoding.UTF8, JSON);
+            }
+
+            HttpResponseMessage response;
+            var client = this.httpClientFactory.CreateClient(HttpClientName);
+
+            try
+            {
+                response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (TaskCanceledException tex)
+            {
+                // HttpClient timeout
+                throw new AppleApiException(HttpStatusCode.RequestTimeout, tex);
             }
             catch (HttpRequestException rex)
             {
-                AppleApiError appleApiError = null; 
-
-                if (responseMessage != null)
-                {
-                    // check to see if API error model was returned in content
-                    appleApiError = await responseMessage.Content.ReadFromJsonAsync<AppleApiError>(this.jsonSerializerOptions, cancellationToken);
-                }
-
-                if (appleApiError != null)
-                {
-                    throw new AppleApiException(rex.StatusCode != null ? rex.StatusCode.Value : HttpStatusCode.InternalServerError, appleApiError, appleApiError.ErrorMessage ?? rex.Message, rex);
-                }
-                else
-                {
-                    throw new AppleApiException(rex.StatusCode != null ? rex.StatusCode.Value : HttpStatusCode.InternalServerError, rex);
-                }
+                throw new AppleApiException(rex.StatusCode ?? HttpStatusCode.ServiceUnavailable, rex);
             }
-            catch (Exception ex)
+
+            if (!response.IsSuccessStatusCode)
             {
-                throw new AppleApiException(HttpStatusCode.InternalServerError, ex);
+                using (response)
+                {
+                    AppleApiError? apiError = await TryReadErrorAsync(response, cancellationToken).ConfigureAwait(false);
+
+                    if (apiError != null)
+                    {
+                        throw new AppleApiException(response.StatusCode, apiError, apiError.ErrorMessage ?? response.ReasonPhrase ?? response.StatusCode.ToString());
+                    }
+
+                    throw new AppleApiException(response.StatusCode);
+                }
             }
 
-            return result;
+            return response;
         }
 
         /// <summary>
-        /// This method is used to create a new HTTP client that utilizes a bearer token for authentication.
+        /// This method attempts to read an Apple error body from a failed response.
         /// </summary>
-        /// <returns></returns>
-        private HttpClient CreateApiHttpClient()
+        private static async Task<AppleApiError?> TryReadErrorAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            var client = this.httpClientFactory?.CreateClient() ?? new HttpClient();
-
-            if (client.DefaultRequestHeaders.Contains("User-Agent"))
+            try
             {
-                client.DefaultRequestHeaders.Remove("User-Agent");
+                string content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    return null;
+                }
+
+                var error = JsonSerializer.Deserialize<AppleApiError>(content, JsonOptions);
+                return error != null && error.ErrorCode != 0 ? error : null;
             }
-
-            // add agent header
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(string.Format(USER_AGENT, typeof(AppStoreServerApiClient).Assembly.GetName().Version));
-            
-            // if no authorization header exists, then generate a new token
-            if (client.DefaultRequestHeaders.Authorization == null)
+            catch (JsonException)
             {
-                // Here you would generate a JWT token for authentication, which involves your private key
-                string jwtToken = this.bearerTokenAuthenticator.GenerateToken();
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken);
-            }
-
-            return client;
-        }
-
-        /// <summary>
-        /// this method is used to set the environment.
-        /// </summary>
-        /// <param name="environment">Contains the apple environment.</param>
-
-        private void SetEnvironment(EnvironmentType environment)
-        {
-            switch (environment)
-            {
-                case EnvironmentType.Production:
-                    this.baseUri = new Uri(PRODUCTION_URL);
-                    break;
-                case EnvironmentType.Sandbox:
-                    this.baseUri = new Uri(SANDBOX_URL);
-                    break;
-                case EnvironmentType.LocalTesting:
-                    this.baseUri = new Uri(LOCAL_TESTING_URL);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(this.settings.Environment), this.settings.Environment, "Invalid environment type.");
+                return null;
             }
         }
     }

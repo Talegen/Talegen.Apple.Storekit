@@ -18,6 +18,7 @@ namespace Talegen.Apple.Storekit.Models.Api
     using System;
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
+    using Talegen.Apple.Storekit.Extensions;
 
     /// <summary>
     /// This enumeration represents the auto-renew status.
@@ -37,6 +38,9 @@ namespace Talegen.Apple.Storekit.Models.Api
         AutomaticRenewalOn = 1
     }
 
+    /// <summary>
+    /// This enumeration represents the reason a subscription expired.
+    /// </summary>
     public enum AppleExpirationIntent
     {
         /// <summary>
@@ -86,10 +90,28 @@ namespace Talegen.Apple.Storekit.Models.Api
     }
 
     /// <summary>
-    /// This enumeration represents the renewal Info payload.
+    /// This class represents the decoded subscription renewal information payload.
     /// </summary>
     public class JwsRenewalInfoDecodedPayload
     {
+        /// <summary>
+        /// Gets or sets the UUID that an app optionally generates to map a customer's purchase to its App Store transaction.
+        /// </summary>
+        [JsonPropertyName("appAccountToken")]
+        public string? AppAccountToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the app download transaction.
+        /// </summary>
+        [JsonPropertyName("appTransactionId")]
+        public string? AppTransactionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the duration of the offer applied to the next renewal, in ISO 8601 format.
+        /// </summary>
+        [JsonPropertyName("offerPeriod")]
+        public string? OfferPeriod { get; set; }
+
         /// <summary>
         /// Gets or sets the auto-renew product identifier.
         /// </summary>
@@ -130,13 +152,13 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets the grace period expires date.
         /// </summary>
         [JsonPropertyName("gracePeriodExpiresDate")]
-        public long GracePeriodExpiresDate { get; set; }
+        public long? GracePeriodExpiresDate { get; set; }
 
         /// <summary>
-        /// Gets the grace period expires date time.
+        /// Gets the grace period expires date time in UTC, or <c>null</c> when the subscription is not in a grace period.
         /// </summary>
         [JsonIgnore]
-        public DateTime GracePeriodExpiresDateTime => DateTimeOffset.FromUnixTimeMilliseconds(this.GracePeriodExpiresDate).DateTime;
+        public DateTime? GracePeriodExpiresDateTime => this.GracePeriodExpiresDate.ToUtcDateTime();
 
         /// <summary>
         /// Gets or sets a value that indicates whether the App Store is attempting to automatically renew an expired subscription.
@@ -173,7 +195,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// subscription is subject to a price increase.
         /// </summary>
         [JsonPropertyName("priceIncreaseStatus")]
-        public ApplePriceIncreaseStatus PriceIncreaseStatus { get; set; }
+        public ApplePriceIncreaseStatus? PriceIncreaseStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the product identifier of the In-App Purchase.
@@ -187,29 +209,33 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// service that are 60 days or fewer.
         /// </summary>
         [JsonPropertyName("recentSubscriptionStartDate")]
-        public long RecentSubscriptionStartDate { get; set; }
+        public long? RecentSubscriptionStartDate { get; set; }
 
         /// <summary>
-        /// Gets the recent subscription start date time.
+        /// Gets the recent subscription start date time in UTC.
         /// </summary>
         [JsonIgnore]
-        public DateTime RecentSubscriptionStartDateTime => DateTimeOffset.FromUnixTimeMilliseconds(this.RecentSubscriptionStartDate).DateTime;
+        public DateTime? RecentSubscriptionStartDateTime => this.RecentSubscriptionStartDate.ToUtcDateTime();
 
         /// <summary>
         /// Gets or sets the UNIX time, in milliseconds, when the most recent 
         /// auto-renewable subscription purchase expires. 
         /// </summary>
         [JsonPropertyName("renewalDate")]
-        public long RenewalDate { get; set; }
+        public long? RenewalDate { get; set; }
 
-        public DateTime RenewalDateTime => DateTimeOffset.FromUnixTimeMilliseconds(this.RenewalDate).DateTime;
+        /// <summary>
+        /// Gets the renewal date time in UTC.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? RenewalDateTime => this.RenewalDate.ToUtcDateTime();
 
         /// <summary>
         /// Gets or sets the renewal price, in milliunits, of the 
         /// auto-renewable subscription that renews at the next billing period.
         /// </summary>
         [JsonPropertyName("renewalPrice")]
-        public long RenewalPrice { get; set; }
+        public long? RenewalPrice { get; set; }
 
         /// <summary>
         /// Gets or sets the UNIX time, in milliseconds,  that the App Store signed the JSON Web Signature (JWS) data.
@@ -221,6 +247,6 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets the signed date time.
         /// </summary>
         [JsonIgnore]
-        public DateTime SignedDateTime => DateTimeOffset.FromUnixTimeMilliseconds(this.SignedDate).DateTime;
+        public DateTime SignedDateTime => DateTimeOffset.FromUnixTimeMilliseconds(this.SignedDate).UtcDateTime;
     }
 }

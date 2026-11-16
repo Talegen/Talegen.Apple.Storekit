@@ -55,7 +55,7 @@ namespace Talegen.Apple.Storekit.Extensions
             {
                 result = AppleTimeUsed.BetweenSixAndTwentyFourHours;
             }
-            else if (minutesConsumed <= 5860)
+            else if (minutesConsumed <= 5760)
             {
                 result = AppleTimeUsed.BetweenOneAndFourDays;
             }
@@ -85,23 +85,23 @@ namespace Talegen.Apple.Storekit.Extensions
             {
                 result = AppleDollarAmount.ZeroDollars;
             }
-            else if (absAmount <= 49.99M)
+            else if (absAmount < 50M)
             {
                 result = AppleDollarAmount.BetweenOneCentAnd50Dollars;
             }
-            else if (absAmount <= 99.99M)
+            else if (absAmount < 100M)
             {
                 result = AppleDollarAmount.Between50And100Dollars;
             }
-            else if (absAmount <= 499.99M)
+            else if (absAmount < 500M)
             {
                 result = AppleDollarAmount.Between100And500Dollars;
             }
-            else if (absAmount <= 999.99M)
+            else if (absAmount < 1000M)
             {
                 result = AppleDollarAmount.Between500And1000Dollars;
             }
-            else if (absAmount <= 1999.99M)
+            else if (absAmount < 2000M)
             {
                 result = AppleDollarAmount.Between1000And2000Dollars;
             }
@@ -120,9 +120,20 @@ namespace Talegen.Apple.Storekit.Extensions
         /// <returns>Returns the appropriate <see cref="AppleAccountTenure"/> value.</returns>
         public static AppleAccountTenure ToAppleAccountTenure(this DateTime createdDateTime)
         {
+            return createdDateTime.ToAppleAccountTenure(DateTime.UtcNow);
+        }
+
+        /// <summary>
+        /// This method will return the Apple account tenure based on the created date time, relative to a reference time.
+        /// </summary>
+        /// <param name="createdDateTime">Contains the account created date time in UTC.</param>
+        /// <param name="utcNow">Contains the reference time in UTC.</param>
+        /// <returns>Returns the appropriate <see cref="AppleAccountTenure"/> value.</returns>
+        public static AppleAccountTenure ToAppleAccountTenure(this DateTime createdDateTime, DateTime utcNow)
+        {
             AppleAccountTenure result;
 
-            int days = (DateTime.UtcNow - createdDateTime).Days;
+            int days = (utcNow - createdDateTime.ToUniversalTime()).Days;
             
             if (days <= 3)
             {
@@ -163,15 +174,18 @@ namespace Talegen.Apple.Storekit.Extensions
         /// </summary>
         /// <param name="client">Contains the client to extend.</param>
         /// <param name="transactionId">Contains a transaction identifier.</param>
+        /// <param name="request">Contains the consumption information.</param>
         /// <param name="environment">Contains the environment override to use for the request.</param>
         /// <param name="cancellationToken">Contains an optional cancellation token.</param>
-        /// <returns></returns>
+        /// <returns>Returns a task representing the operation.</returns>
         public static async Task SendConsumptionInfoAsync(this IAppStoreServerApiClient client, string transactionId, ConsumptionRequest request, EnvironmentType? environment = null, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(nameof(client));
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(transactionId));
-            string endpoint = $"/inApps/v1/transactions/consumption/{transactionId}";
-            await client.MakeRequest(endpoint, HttpMethod.Put, requestBody: request, environment: environment, cancellationToken: cancellationToken);
+            ArgumentNullException.ThrowIfNull(client);
+            ArgumentException.ThrowIfNullOrWhiteSpace(transactionId);
+            ArgumentNullException.ThrowIfNull(request);
+
+            string endpoint = $"/inApps/v1/transactions/consumption/{Uri.EscapeDataString(transactionId)}";
+            await client.MakeRequest(endpoint, HttpMethod.Put, requestBody: request, environment: environment, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }
 }

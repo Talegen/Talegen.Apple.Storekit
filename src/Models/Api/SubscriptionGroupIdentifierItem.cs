@@ -34,6 +34,6 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// for all auto-renewable subscriptions in the subscription group.
         /// </summary>
         [JsonPropertyName("lastTransactions")]
-        public List<LastTransactionsItem> LastTransactions { get; set; }
+        public List<LastTransactionsItem> LastTransactions { get; set; } = new List<LastTransactionsItem>();
     }
 }

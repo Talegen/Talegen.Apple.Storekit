@@ -366,6 +366,12 @@ namespace Talegen.Apple.Storekit.Client
          *
          * @see <a href="https://developer.apple.com/documentation/appstoreserverapi/originaltransactionidnotfoundretryableerror">OriginalTransactionIdNotFoundRetryableError</a>
          */
+        OriginalTransactionIdNotFoundRetryable = 4040006L,
+
+        /// <summary>
+        /// Misspelled alias of <see cref="OriginalTransactionIdNotFoundRetryable"/>, kept for backward compatibility.
+        /// </summary>
+        [Obsolete("Use OriginalTransactionIdNotFoundRetryable.")]
         OrigionalTransactionIdNotFoundRetryable = 4040006L,
 
         /**
@@ -432,6 +438,7 @@ namespace Talegen.Apple.Storekit.Client
         /// Initializes a new instance of the <see cref="AppleApiError"/> class.
         /// </summary>
         /// <param name="errorCode">Contains the error code to initialize.</param>
+        /// <param name="errorMessage">Contains the error message.</param>
         public AppleApiError(AppleErrorCodes errorCode, string errorMessage = "")
         {
             this.ErrorCode = errorCode;
@@ -447,6 +454,7 @@ namespace Talegen.Apple.Storekit.Client
         /// <summary>
         /// Gets or sets the error message.
         /// </summary>
-        public string ErrorMessage { get; set; }
+        [JsonPropertyName("errorMessage")]
+        public string? ErrorMessage { get; set; }
     }
 }

@@ -17,21 +17,37 @@ namespace Talegen.Apple.Storekit.Models.Api
 {
     using System.Runtime.Serialization;
     using System.Text.Json.Serialization;
+    using Talegen.Apple.Storekit.Models.Converters;
+    using Talegen.Apple.Storekit.Extensions;
 
     /// <summary>
     /// An enumerated list of Apple Offer Discount Types.
     /// </summary>
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(EnumMemberJsonConverter<AppleOfferDiscountType>))]
     public enum AppleOfferDiscountType
     {
+        /// <summary>
+        /// A payment mode of a product discount that indicates a free trial.
+        /// </summary>
         [EnumMember(Value = "FREE_TRIAL")]
         FreeTrial,
 
+        /// <summary>
+        /// A payment mode of a product discount that customers pay over a single or multiple billing periods.
+        /// </summary>
         [EnumMember(Value = "PAY_AS_YOU_GO")]
         PayAsYouGo,
 
+        /// <summary>
+        /// A payment mode of a product discount that customers pay up front.
+        /// </summary>
         [EnumMember(Value = "PAY_UP_FRONT")]
-        PayUpFront
+        PayUpFront,
+
+        /// <summary>
+        /// A discount type that this version of the library does not recognize.
+        /// </summary>
+        Unknown = -1,
     }
 
     /// <summary>
@@ -42,7 +58,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// <summary>
         /// The introductory offer for a subscription.
         /// </summary>
-        Introductory = 0,
+        Introductory = 1,
 
         /// <summary>
         /// The promotional offer for a subscription.
@@ -72,7 +88,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         RefundedForOtherReasons = 0,
 
         /// <summary>
-        /// The App Store refunded the transaction on behalf of the customer due to an
+        /// The App Store refunded the transaction on behalf of the customer due to an actual or perceived issue within your app.
         /// </summary>
         RefundedDueToIssue = 1
     }
@@ -80,7 +96,7 @@ namespace Talegen.Apple.Storekit.Models.Api
     /// <summary>
     /// An enumerated list of Apple Transaction Reasons.
     /// </summary>
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(EnumMemberJsonConverter<AppleTransactionReason>))]
     public enum AppleTransactionReason
     {
         /// <summary>
@@ -94,7 +110,12 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// The App Store server initiated the purchase transaction to renew an auto-renewable subscription.
         /// </summary>
         [EnumMember(Value = "RENEWAL")]
-        Renewal
+        Renewal,
+
+        /// <summary>
+        /// A transaction reason that this version of the library does not recognize.
+        /// </summary>
+        Unknown = -1,
     }
 
     /// <summary>
@@ -110,7 +131,19 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// <see href="https://developer.apple.com/documentation/appstoreserverapi/appaccounttoken"/>
         /// </remarks>
         [System.Text.Json.Serialization.JsonPropertyName("appAccountToken")]
-        public string AppAccountToken { get; set; }
+        public string? AppAccountToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the app download transaction.
+        /// </summary>
+        [JsonPropertyName("appTransactionId")]
+        public string? AppTransactionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the duration of the offer applied to the transaction, in ISO 8601 format (e.g. <c>P1M</c>).
+        /// </summary>
+        [JsonPropertyName("offerPeriod")]
+        public string? OfferPeriod { get; set; }
 
         /// <summary>
         /// Gets or sets the bundle id.
@@ -346,5 +379,35 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// </remarks>
         [System.Text.Json.Serialization.JsonPropertyName("webOrderLineItemId")]
         public string WebOrderLineItemId { get; set; }
+
+        /// <summary>
+        /// Gets the purchase date as a UTC <see cref="DateTime"/>.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? PurchaseDateUtc => this.PurchaseDate.ToUtcDateTime();
+
+        /// <summary>
+        /// Gets the original purchase date as a UTC <see cref="DateTime"/>.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? OriginalPurchaseDateUtc => ((long?)this.OriginalPurchaseDate).ToUtcDateTime();
+
+        /// <summary>
+        /// Gets the expiration date as a UTC <see cref="DateTime"/>, for subscriptions.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? ExpiresDateUtc => this.ExpiresDate.ToUtcDateTime();
+
+        /// <summary>
+        /// Gets the revocation date as a UTC <see cref="DateTime"/>, if the transaction was refunded or revoked.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? RevocationDateUtc => this.RevocationDate.ToUtcDateTime();
+
+        /// <summary>
+        /// Gets the signed date as a UTC <see cref="DateTime"/>.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? SignedDateUtc => this.SignedDate.ToUtcDateTime();
     }
 }

@@ -15,6 +15,9 @@
 */
 namespace Talegen.Apple.Storekit.Models.Api
 {
+    using System.Collections.Generic;
+    using System.Globalization;
+
     /// <summary>
     /// This class contains the transaction history request model.
     /// </summary>
@@ -38,7 +41,7 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// An optional start date of the timespan for the transaction history records you’re requesting. 
         /// The startDate needs to precede the endDate if you specify both dates. The results include a 
         /// transaction if its purchaseDate is equal to or greater than the startDate.
-        /// This is converted to UNIX timestamp.
+        /// The value is UNIX time in milliseconds.
         /// </remarks>
         public long? StartDate { get; set; }
 
@@ -49,12 +52,12 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// An optional end date of the timespan for the transaction history records you’re requesting. 
         /// Choose an endDate that’s later than the startDate if you specify both dates. Using an endDate 
         /// in the future is valid. The results include a transaction if its purchaseDate is less than the endDate.
-        /// This is converted to UNIX timestamp.
+        /// The value is UNIX time in milliseconds.
         /// </remarks>
         public long? EndDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the limit.
+        /// Gets or sets the product identifier filter.
         /// </summary>
         /// <remarks>
         /// An optional filter that indicates the product identifier to include in the transaction history. 
@@ -95,5 +98,33 @@ namespace Talegen.Apple.Storekit.Models.Api
         /// Gets or sets an optional filter that indicates the subscription group identifier to include in the transaction history.
         /// </summary>
         public string? SubscriptionGroupIdentifier { get; set; }
-     }
+
+        /// <summary>
+        /// This method converts the request into App Store Server API query parameters (camelCase names, lowercase booleans).
+        /// </summary>
+        /// <returns>Returns the query parameters for the non-empty properties.</returns>
+        public Dictionary<string, string> ToQueryParameters()
+        {
+            var parameters = new Dictionary<string, string>();
+
+            void Add(string name, string? value)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    parameters[name] = value;
+                }
+            }
+
+            Add("revision", this.Revision);
+            Add("startDate", this.StartDate?.ToString(CultureInfo.InvariantCulture));
+            Add("endDate", this.EndDate?.ToString(CultureInfo.InvariantCulture));
+            Add("productId", this.ProductId);
+            Add("productType", this.ProductType);
+            Add("inAppOwnershipType", this.InAppOwnershipType);
+            Add("sort", this.Sort);
+            Add("revoked", this.Revoked.HasValue ? (this.Revoked.Value ? "true" : "false") : null);
+            Add("subscriptionGroupIdentifier", this.SubscriptionGroupIdentifier);
+            return parameters;
+        }
+    }
 }
