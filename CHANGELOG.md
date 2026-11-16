@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.1.0
+
+### Added
+
+- Multi-target `net8.0` and `net10.0`. CI installs both SDKs and runs the tests on each framework.
+
+### Fixed
+
+- 2.0.3 depended on `Microsoft.Extensions.Http` 11.0.0, which doesn't support `net8.0`; .NET 8 consumers got
+  "doesn't support net8.0" warnings and the untested netstandard2.0 build of those packages. The dependency is
+  now 10.0.12, which supports both `net8.0` and `net10.0`; apps on newer versions can still reference 11.x.
+- `logo.ico` was packed as `content`/`contentFiles`, adding an `Assets/logo.ico` file to every consuming project.
+- Certificates are loaded with `X509CertificateLoader` on .NET 9+ (the `X509Certificate2(byte[])` constructor is
+  obsolete there, `SYSLIB0057`).
+
 ## 2.0.0
 
 ### Fixed

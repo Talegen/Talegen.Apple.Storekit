@@ -298,7 +298,7 @@ namespace Talegen.Apple.Storekit.Client
 
             try
             {
-                certificates = header.CertificateChain.Select(c => new X509Certificate2(Convert.FromBase64String(c ?? throw new FormatException("Null certificate entry.")))).ToList();
+                certificates = header.CertificateChain.Select(c => LoadCertificate(Convert.FromBase64String(c ?? throw new FormatException("Null certificate entry.")))).ToList();
             }
             catch (Exception ex) when (ex is FormatException || ex is CryptographicException || ex is ArgumentException)
             {
@@ -371,6 +371,18 @@ namespace Talegen.Apple.Storekit.Client
             {
                 throw new SignedDataVerificationException(VerificationStatus.InvalidCertificate, "The certificate chain does not match the x5c header.");
             }
+        }
+
+        /// <summary>
+        /// Loads a DER-encoded X.509 certificate.
+        /// </summary>
+        private static X509Certificate2 LoadCertificate(byte[] der)
+        {
+#if NET9_0_OR_GREATER
+            return X509CertificateLoader.LoadCertificate(der);
+#else
+            return new X509Certificate2(der);
+#endif
         }
 
         /// <summary>
