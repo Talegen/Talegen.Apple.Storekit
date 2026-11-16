@@ -51,6 +51,8 @@ jobs:
     if: github.event_name == 'release'
     runs-on: windows-latest
     needs: [create_nuget]
+    # Must match the Environment in the nuget.org trusted publishing policy; it is included in the OIDC token.
+    environment: release
     # Job-level permissions aren't inherited between jobs: NuGet/login runs here, so the OIDC token must be granted here.
     permissions:
       id-token: write  # required for NuGet trusted publishing (GitHub OIDC)
